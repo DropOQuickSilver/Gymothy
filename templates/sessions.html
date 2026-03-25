@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Sessions | Gymothy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">G</div>
+                <div>
+                    <h2>Gymothy</h2>
+                    <p>Workout & Nutrition Tracker</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <p class="nav-heading">Main</p>
+                <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
+                <a href="{{ url_for('sessions') }}" class="nav-link active">Workout Sessions</a>
+                <a href="{{ url_for('macros') }}" class="nav-link">Macros</a>
+
+                <p class="nav-heading nav-spacing">Account</p>
+                <a href="{{ url_for('logout') }}" class="nav-link">Log out</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <h1>Workout Sessions</h1>
+                    <p class="topbar-subtext">View and manage your logged training sessions.</p>
+                </div>
+
+                <div class="topbar-right">
+                    <a href="{{ url_for('new_session') }}" class="primary-action">+ New Session</a>
+                </div>
+            </header>
+
+            <section class="panel full-width">
+                <div class="panel-header">
+                    <h3>All Sessions</h3>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Session</th>
+                                <th>Duration</th>
+                                <th>Focus</th>
+                                <th>Status</th>
+                                <th>Edit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if workout_sessions %}
+                                {% for session in workout_sessions %}
+                                    <tr>
+                                        <td>{{ session.date }}</td>
+                                        <td>{{ session.session_name }}</td>
+                                        <td>{{ session.duration_minutes }} min</td>
+                                        <td>{{ session.focus }}</td>
+                                        <td><span class="table-badge">Saved</span></td>
+                                        <td><a href="#" class="table-link">Edit</a></td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="empty-table">No workout sessions logged yet.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

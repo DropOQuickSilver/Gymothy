@@ -25,7 +25,7 @@ login_manager.login_view = "login"
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), nullable=False, unique=True)
+    username = db.Column(db.String(60), nullable=False, unique=True)
     password = db.Column(db.String(200), nullable=False)
 
 
@@ -36,11 +36,11 @@ def load_user(user_id):
 
 class RegisterForm(FlaskForm):
     username = StringField(
-        validators=[InputRequired(), Length(min=4, max=20)],
+        validators=[InputRequired(), Length(min=4, max=60)],
         render_kw={"placeholder": "Username"}
     )
     password = PasswordField(
-        validators=[InputRequired(), Length(min=4, max=20)],
+        validators=[InputRequired(), Length(min=4, max=60)],
         render_kw={"placeholder": "Password"}
     )
     submit = SubmitField("Register")
@@ -53,11 +53,11 @@ class RegisterForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     username = StringField(
-        validators=[InputRequired(), Length(min=4, max=20)],
+        validators=[InputRequired(), Length(min=4, max=60)],
         render_kw={"placeholder": "Username"}
     )
     password = PasswordField(
-        validators=[InputRequired(), Length(min=4, max=20)],
+        validators=[InputRequired(), Length(min=4, max=60)],
         render_kw={"placeholder": "Password"}
     )
     submit = SubmitField("Login")
@@ -86,6 +86,34 @@ def login():
 @login_required
 def dashboard():
     return render_template('dashboard.html')
+
+@app.route('/sessions')
+@login_required
+def sessions():
+    return render_template('sessions.html')
+
+
+@app.route('/macros')
+@login_required
+def macros():
+    return render_template('macros.html')
+
+
+@app.route('/new-session')
+@login_required
+def new_session():
+    return "<h1>New Session page coming soon</h1>"
+
+
+@app.route('/add-meal')
+@login_required
+def add_meal():
+    return "<h1>Add Meal page coming soon</h1>"
+
+@app.route('/start-workout')
+@login_required
+def start_workout():
+    return "<h1>Start Workout page coming soon</h1>"
 
 
 @app.route('/logout')

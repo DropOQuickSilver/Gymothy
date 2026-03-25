@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Macros | Gymothy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">G</div>
+                <div>
+                    <h2>Gymothy</h2>
+                    <p>Workout & Nutrition Tracker</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <p class="nav-heading">Main</p>
+                <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
+                <a href="{{ url_for('sessions') }}" class="nav-link">Workout Sessions</a>
+                <a href="{{ url_for('macros') }}" class="nav-link active">Macros</a>
+
+                <p class="nav-heading nav-spacing">Account</p>
+                <a href="{{ url_for('logout') }}" class="nav-link">Log out</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <h1>Macros</h1>
+                    <p class="topbar-subtext">Track calories, protein, carbs, fats, and meals.</p>
+                </div>
+
+                <div class="topbar-right">
+                    <a href="{{ url_for('add_meal') }}" class="primary-action">+ Add Meal</a>
+                </div>
+            </header>
+
+            <section class="stats-grid">
+                <article class="stat-card accent-orange">
+                    <div class="stat-icon">🔥</div>
+                    <h2>{{ total_calories }}</h2>
+                    <p class="stat-label">CALORIES</p>
+                </article>
+
+                <article class="stat-card accent-blue">
+                    <div class="stat-icon">🥩</div>
+                    <h2>{{ total_protein }}g</h2>
+                    <p class="stat-label">PROTEIN</p>
+                </article>
+
+                <article class="stat-card accent-green">
+                    <div class="stat-icon">🍚</div>
+                    <h2>{{ total_carbs }}g</h2>
+                    <p class="stat-label">CARBS</p>
+                </article>
+
+                <article class="stat-card accent-dark">
+                    <div class="stat-icon">🥑</div>
+                    <h2>{{ total_fats }}g</h2>
+                    <p class="stat-label">FATS</p>
+                </article>
+            </section>
+
+            <section class="dashboard-grid">
+                <article class="panel">
+                    <div class="panel-header">
+                        <h3>Nutrition Summary</h3>
+                    </div>
+
+                    <div class="macro-list">
+                        <div class="macro-row">
+                            <span>Calories</span>
+                            <strong>{{ total_calories }} kcal</strong>
+                        </div>
+
+                        <div class="macro-row">
+                            <span>Protein</span>
+                            <strong>{{ total_protein }} g</strong>
+                        </div>
+
+                        <div class="macro-row">
+                            <span>Carbs</span>
+                            <strong>{{ total_carbs }} g</strong>
+                        </div>
+
+                        <div class="macro-row">
+                            <span>Fats</span>
+                            <strong>{{ total_fats }} g</strong>
+                        </div>
+
+                        <div class="macro-row">
+                            <span>Meals Logged</span>
+                            <strong>{{ meals|length }}</strong>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel">
+                    <div class="panel-header">
+                        <h3>Meals</h3>
+                    </div>
+
+                    <div class="session-list">
+                        {% if meals %}
+                            {% for meal in meals %}
+                                <div class="session-item">
+                                    <div>
+                                        <h4>{{ meal.meal_name }}</h4>
+                                        <p>{{ meal.protein }}g protein · {{ meal.carbs }}g carbs · {{ meal.fats }}g fats</p>
+                                    </div>
+                                    <span class="session-minutes">{{ meal.calories }} kcal</span>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="empty-state">No meals logged yet.</p>
+                        {% endif %}
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
