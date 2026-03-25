@@ -3,18 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>Register | Gymothy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Register Page</h1>
+    <main class="auth-page">
+        <section class="auth-card" aria-labelledby="register-title">
+            <div class="brand-block">
+                <p class="brand-tag">Gymothy</p>
+                <h1 id="register-title">Create account</h1>
+                <p class="auth-subtext">Set up your Gymothy account to start logging training and meals.</p>
+            </div>
 
-        <form method="POST" action="">
-            {{ form.hidden_tag() }}
-            {{ form.username }}
-            {{ form.password }}
-            {{ form.submit }}
-        </form>
-    
-    <a href="{{url_for('login')}}">Already have an account? Login!</a><br>
+            <form method="POST" action="" class="auth-form" novalidate>
+                {{ form.hidden_tag() }}
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    {{ form.username(
+                        id="username",
+                        class="form-input",
+                        placeholder="Choose a username",
+                        autocomplete="username"
+                    ) }}
+                    {% for error in form.username.errors %}
+                        <p class="error-text">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    {{ form.password(
+                        id="password",
+                        class="form-input",
+                        placeholder="Create a password",
+                        autocomplete="new-password"
+                    ) }}
+                    {% for error in form.password.errors %}
+                        <p class="error-text">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                {{ form.submit(class="auth-button") }}
+
+                <p class="auth-switch">
+                    Already have an account?
+                    <a href="{{ url_for('login') }}">Log in</a>
+                </p>
+            </form>
+        </section>
+    </main>
 </body>
 </html>
