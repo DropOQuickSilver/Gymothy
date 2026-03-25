@@ -3,11 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Authentication System in Flask</title>
+    <title>Home | Gymothy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Hello from Flask</h1>
-    <a href="{{url_for('login')}}">Login Page</a><br>
-    <a href="{{url_for('register')}}">Register Page</a><br>
+
+<main class="auth-page">
+    <section class="auth-card" aria-labelledby="home-title">
+
+        <!-- Branding -->
+        <div class="brand-block">
+            <p class="brand-tag">Gymothy</p>
+            <h1 id="home-title">Welcome to Gymothy</h1>
+            <p class="auth-subtext">
+                Your all-in-one platform for tracking workouts, nutrition, and progress.
+                Stay consistent, stay strong.
+            </p>
+        </div>
+
+        <!-- Features -->
+        <div class="features">
+            <div class="feature">
+                <h3>🏋️ Workout Tracking</h3>
+                <p>Log exercises, sets, reps, and weights to monitor progress over time.</p>
+            </div>
+
+            <div class="feature">
+                <h3>🍎 Nutrition Logging</h3>
+                <p>Track calories and macros to optimise performance and recovery.</p>
+            </div>
+
+            <div class="feature">
+                <h3>📈 Progress Visualisation</h3>
+                <p>Visualise improvements and stay motivated with measurable results.</p>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="home-buttons">
+            <a href="{{ url_for('login') }}" class="auth-button">Log in</a>
+            <a href="{{ url_for('register') }}" class="auth-button">Create account</a>
+        </div>
+
+    </section>
+</main>
+
 </body>
 </html>
