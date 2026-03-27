@@ -6,6 +6,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, IntegerField, FloatField
 from wtforms.validators import InputRequired, Length, ValidationError
 from flask_bcrypt import Bcrypt
+from flask import abort
+from functools import wraps
 
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -78,7 +80,13 @@ class PersonalRecord(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-
+def admin_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            abort(403)  # Forbidden
+        return func(*args, **kwargs)
+    return wrapper
 
 # Forms
 
@@ -311,6 +319,78 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
+@app.route('/admin/debug')
+@login_required
+@admin_required
+def admin_debug():
+    users = User.query.all()
+    workout_sessions = WorkoutSession.query.all()
+    meals = Meal.query.all()
+    exercises = ExerciseEntry.query.all()
+
+    return render_template(
+        'admin_debug.html',
+        users=users,
+        workout_sessions=workout_sessions,
+        meals=meals,
+        exercises=exercises
+    )
+
+@app.route('/session/<int:session_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_session(session_id):
+    session = WorkoutSession.query.filter_by(id=session_id, user_id=current_user.id).first_or_404()
+    form = WorkoutSessionForm(obj=session)
+
+    if form.validate_on_submit():
+        session.session_name = form.session_name.data
+        session.date = form.date.data
+        session.duration_minutes = form.duration_minutes.data
+        session.focus = form.focus.data
+
+        db.session.commit()
+        return redirect(url_for('sessions'))
+
+    return render_template('edit_session.html', form=form, session=session)
+
+
+@app.route('/session/<int:session_id>/delete', methods=['POST'])
+@login_required
+def delete_session(session_id):
+    session = WorkoutSession.query.filter_by(id=session_id, user_id=current_user.id).first_or_404()
+
+    db.session.delete(session)
+    db.session.commit()
+    return redirect(url_for('sessions'))
+
+
+@app.route('/meal/<int:meal_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_meal(meal_id):
+    meal = Meal.query.filter_by(id=meal_id, user_id=current_user.id).first_or_404()
+    form = MealForm(obj=meal)
+
+    if form.validate_on_submit():
+        meal.meal_name = form.meal_name.data
+        meal.calories = form.calories.data
+        meal.protein = form.protein.data
+        meal.carbs = form.carbs.data
+        meal.fats = form.fats.data
+
+        db.session.commit()
+        return redirect(url_for('macros'))
+
+    return render_template('edit_meal.html', form=form, meal=meal)
+
+
+@app.route('/meal/<int:meal_id>/delete', methods=['POST'])
+@login_required
+def delete_meal(meal_id):
+    meal = Meal.query.filter_by(id=meal_id, user_id=current_user.id).first_or_404()
+
+    db.session.delete(meal)
+    db.session.commit()
+    return redirect(url_for('macros'))
 
 if __name__ == '__main__':
     with app.app_context():

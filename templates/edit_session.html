@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Session | Gymothy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="auth-page">
+        <section class="auth-card">
+            <div class="brand-block">
+                <p class="brand-tag">Gymothy</p>
+                <h1>Edit Workout Session</h1>
+                <p class="auth-subtext">Update the details for this workout session.</p>
+            </div>
+
+            <form method="POST" class="auth-form">
+                {{ form.hidden_tag() }}
+
+                <div class="form-group">
+                    <label>{{ form.session_name.label }}</label>
+                    {{ form.session_name(class="form-input") }}
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.date.label }}</label>
+                    {{ form.date(class="form-input") }}
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.duration_minutes.label }}</label>
+                    {{ form.duration_minutes(class="form-input") }}
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.focus.label }}</label>
+                    {{ form.focus(class="form-input") }}
+                </div>
+
+                {{ form.submit(class="auth-button") }}
+            </form>
+        </section>
+    </main>
+</body>
+</html>
