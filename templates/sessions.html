@@ -66,7 +66,7 @@
                                         <td>{{ session.duration_minutes }} min</td>
                                         <td>{{ session.focus }}</td>
                                         <td><span class="table-badge">Saved</span></td>
-                                        <td><a href="#" class="table-link">Edit</a></td>
+                                        <td><a href="{{ url_for('view_session', session_id=session.id) }}" class="table-link">View</a></td>
                                     </tr>
                                 {% endfor %}
                             {% else %}

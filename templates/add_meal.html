@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Meal | Gymothy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="auth-page">
+        <section class="auth-card">
+            <div class="brand-block">
+                <p class="brand-tag">Gymothy</p>
+                <h1>Add Meal</h1>
+                <p class="auth-subtext">Log a meal with calories and macros.</p>
+            </div>
+
+            <form method="POST" class="auth-form">
+                {{ form.hidden_tag() }}
+
+                <div class="form-group">
+                    <label>{{ form.meal_name.label }}</label>
+                    {{ form.meal_name(class="form-input") }}
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.calories.label }}</label>
+                    {{ form.calories(class="form-input") }}
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.protein.label }}</label>
+                    {{ form.protein(class="form-input") }}
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.carbs.label }}</label>
+                    {{ form.carbs(class="form-input") }}
+                </div>
+
+                <div class="form-group">
+                    <label>{{ form.fats.label }}</label>
+                    {{ form.fats(class="form-input") }}
+                </div>
+
+                {{ form.submit(class="auth-button") }}
+            </form>
+        </section>
+    </main>
+</body>
+</html>

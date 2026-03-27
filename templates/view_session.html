@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ session.session_name }} | Gymothy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="auth-page">
+        <section class="auth-card">
+            <div class="brand-block">
+                <p class="brand-tag">Gymothy</p>
+                <h1>{{ session.session_name }}</h1>
+                <p class="auth-subtext">
+                    {{ session.date }} • {{ session.duration_minutes }} min • {{ session.focus }}
+                </p>
+            </div>
+
+            <div class="home-buttons" style="margin-bottom: 20px;">
+                <a href="{{ url_for('add_exercise', session_id=session.id) }}" class="auth-button">Add Exercise</a>
+                <a href="{{ url_for('sessions') }}" class="auth-button">Back to Sessions</a>
+            </div>
+
+            {% if session.exercises %}
+                {% for exercise in session.exercises %}
+                    <div class="feature" style="margin-bottom: 16px;">
+                        <h3>{{ exercise.exercise_name }}</h3>
+                        <p>Sets: {{ exercise.sets }}</p>
+                        <p>Reps: {{ exercise.reps }}</p>
+                        <p>Weight: {{ exercise.weight }} kg</p>
+                        <p>RPE: {{ exercise.rpe if exercise.rpe is not none else 'N/A' }}</p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No exercises added yet.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

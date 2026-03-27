@@ -1,9 +1,9 @@
 from flask import Flask, render_template, url_for, redirect
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user
+from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 import os
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, IntegerField, FloatField
 from wtforms.validators import InputRequired, Length, ValidationError
 from flask_bcrypt import Bcrypt
 
@@ -11,7 +11,7 @@ app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
-app.config['SECRET_KEY'] = 'thisisasecretkey'
+app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "dev-secret-key")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
@@ -23,16 +23,64 @@ login_manager.init_app(app)
 login_manager.login_view = "login"
 
 
+
+# Database Models
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(60), nullable=False, unique=True)
     password = db.Column(db.String(200), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
+    workout_sessions = db.relationship('WorkoutSession', backref='user', lazy=True, cascade="all, delete-orphan")
+    meals = db.relationship('Meal', backref='user', lazy=True, cascade="all, delete-orphan")
+    prs = db.relationship('PersonalRecord', backref='user', lazy=True, cascade="all, delete-orphan")
+
+
+class WorkoutSession(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    session_name = db.Column(db.String(100), nullable=False)
+    date = db.Column(db.String(30), nullable=False)
+    duration_minutes = db.Column(db.Integer, nullable=False, default=0)
+    focus = db.Column(db.String(100), nullable=False, default="General")
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    exercises = db.relationship('ExerciseEntry', backref='session', lazy=True, cascade="all, delete-orphan")
+
+class ExerciseEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    exercise_name = db.Column(db.String(100), nullable=False)
+    sets = db.Column(db.Integer, nullable=False, default=0)
+    reps = db.Column(db.Integer, nullable=False, default=0)
+    weight = db.Column(db.Float, nullable=False, default=0)
+    rpe = db.Column(db.Float, nullable=True)
+    session_id = db.Column(db.Integer, db.ForeignKey('workout_session.id'), nullable=False)
+
+class Meal(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    meal_name = db.Column(db.String(100), nullable=False)
+    calories = db.Column(db.Integer, nullable=False, default=0)
+    protein = db.Column(db.Integer, nullable=False, default=0)
+    carbs = db.Column(db.Integer, nullable=False, default=0)
+    fats = db.Column(db.Integer, nullable=False, default=0)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+class PersonalRecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    lift_name = db.Column(db.String(100), nullable=False)
+    weight = db.Column(db.Integer, nullable=False, default=0)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+
+
+# Login Manager
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
+
+# Forms
 
 class RegisterForm(FlaskForm):
     username = StringField(
@@ -62,6 +110,33 @@ class LoginForm(FlaskForm):
     )
     submit = SubmitField("Login")
 
+class MealForm(FlaskForm):
+    meal_name = StringField("Meal Name", validators=[InputRequired(), Length(min=1, max=100)])
+    calories = IntegerField("Calories", validators=[InputRequired()])
+    protein = IntegerField("Protein (g)", validators=[InputRequired()])
+    carbs = IntegerField("Carbs (g)", validators=[InputRequired()])
+    fats = IntegerField("Fats (g)", validators=[InputRequired()])
+    submit = SubmitField("Save Meal")
+
+
+class WorkoutSessionForm(FlaskForm):
+    session_name = StringField("Session Name", validators=[InputRequired(), Length(min=1, max=100)])
+    date = StringField("Date", validators=[InputRequired(), Length(min=1, max=30)])
+    duration_minutes = IntegerField("Duration (minutes)", validators=[InputRequired()])
+    focus = StringField("Focus", validators=[InputRequired(), Length(min=1, max=100)])
+    submit = SubmitField("Save Session")
+
+
+class ExerciseEntryForm(FlaskForm):
+    exercise_name = StringField("Exercise Name", validators=[InputRequired(), Length(min=1, max=100)])
+    sets = IntegerField("Sets", validators=[InputRequired()])
+    reps = IntegerField("Reps", validators=[InputRequired()])
+    weight = FloatField("Weight (kg)", validators=[InputRequired()])
+    rpe = FloatField("RPE")
+    submit = SubmitField("Add Exercise")
+
+
+# Route Pages
 
 @app.route('/')
 def home():
@@ -82,47 +157,6 @@ def login():
     return render_template('login.html', form=form)
 
 
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    return render_template('dashboard.html')
-
-@app.route('/sessions')
-@login_required
-def sessions():
-    return render_template('sessions.html')
-
-
-@app.route('/macros')
-@login_required
-def macros():
-    return render_template('macros.html')
-
-
-@app.route('/new-session')
-@login_required
-def new_session():
-    return "<h1>New Session page coming soon</h1>"
-
-
-@app.route('/add-meal')
-@login_required
-def add_meal():
-    return "<h1>Add Meal page coming soon</h1>"
-
-@app.route('/start-workout')
-@login_required
-def start_workout():
-    return "<h1>Start Workout page coming soon</h1>"
-
-
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
-
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
@@ -139,9 +173,146 @@ def register():
     return render_template('register.html', form=form)
 
 
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    workout_sessions = WorkoutSession.query.filter_by(user_id=current_user.id).order_by(WorkoutSession.id.desc()).all()
+    meals = Meal.query.filter_by(user_id=current_user.id).order_by(Meal.id.desc()).all()
+    prs = PersonalRecord.query.filter_by(user_id=current_user.id).order_by(PersonalRecord.id.desc()).all()
+
+    total_sessions = len(workout_sessions)
+    total_meals = len(meals)
+    total_calories = sum(meal.calories for meal in meals)
+    total_protein = sum(meal.protein for meal in meals)
+    total_carbs = sum(meal.carbs for meal in meals)
+    total_fats = sum(meal.fats for meal in meals)
+
+    recent_sessions = workout_sessions[:5]
+    recent_meals = meals[:5]
+
+    return render_template(
+        'dashboard.html',
+        total_sessions=total_sessions,
+        prs=prs,
+        total_meals=total_meals,
+        total_calories=total_calories,
+        total_protein=total_protein,
+        total_carbs=total_carbs,
+        total_fats=total_fats,
+        recent_sessions=recent_sessions,
+        recent_meals=recent_meals
+    )
+
+
+@app.route('/sessions')
+@login_required
+def sessions():
+    workout_sessions = WorkoutSession.query.filter_by(user_id=current_user.id).order_by(WorkoutSession.id.desc()).all()
+    return render_template('sessions.html', workout_sessions=workout_sessions)
+
+
+@app.route('/macros')
+@login_required
+def macros():
+    meals = Meal.query.filter_by(user_id=current_user.id).order_by(Meal.id.desc()).all()
+
+    total_calories = sum(meal.calories for meal in meals)
+    total_protein = sum(meal.protein for meal in meals)
+    total_carbs = sum(meal.carbs for meal in meals)
+    total_fats = sum(meal.fats for meal in meals)
+
+    return render_template(
+        'macros.html',
+        meals=meals,
+        total_calories=total_calories,
+        total_protein=total_protein,
+        total_carbs=total_carbs,
+        total_fats=total_fats
+    )
+
+
+@app.route('/new-session', methods=['GET', 'POST'])
+@login_required
+def new_session():
+    form = WorkoutSessionForm()
+
+    if form.validate_on_submit():
+        session = WorkoutSession(
+            session_name=form.session_name.data,
+            date=form.date.data,
+            duration_minutes=form.duration_minutes.data,
+            focus=form.focus.data,
+            user_id=current_user.id
+        )
+        db.session.add(session)
+        db.session.commit()
+        return redirect(url_for('sessions'))
+
+    return render_template('new_session.html', form=form)
+
+@app.route('/session/<int:session_id>/add-exercise', methods=['GET', 'POST'])
+@login_required
+def add_exercise(session_id):
+    session = WorkoutSession.query.filter_by(id=session_id, user_id=current_user.id).first_or_404()
+    form = ExerciseEntryForm()
+
+    if form.validate_on_submit():
+        exercise = ExerciseEntry(
+            exercise_name=form.exercise_name.data,
+            sets=form.sets.data,
+            reps=form.reps.data,
+            weight=form.weight.data,
+            rpe=form.rpe.data,
+            session_id=session.id
+        )
+        db.session.add(exercise)
+        db.session.commit()
+        return redirect(url_for('view_session', session_id=session.id))
+
+    return render_template('add_exercise.html', form=form, session=session)
+
+@app.route('/session/<int:session_id>')
+@login_required
+def view_session(session_id):
+    session = WorkoutSession.query.filter_by(id=session_id, user_id=current_user.id).first_or_404()
+    return render_template('view_session.html', session=session)
+
+
+@app.route('/add-meal', methods=['GET', 'POST'])
+@login_required
+def add_meal():
+    form = MealForm()
+
+    if form.validate_on_submit():
+        meal = Meal(
+            meal_name=form.meal_name.data,
+            calories=form.calories.data,
+            protein=form.protein.data,
+            carbs=form.carbs.data,
+            fats=form.fats.data,
+            user_id=current_user.id
+        )
+        db.session.add(meal)
+        db.session.commit()
+        return redirect(url_for('macros'))
+
+    return render_template('add_meal.html', form=form)
+
+
+@app.route('/start-workout')
+@login_required
+def start_workout():
+    return redirect(url_for('new_session'))
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
-
-    
