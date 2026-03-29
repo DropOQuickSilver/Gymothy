@@ -11,3 +11,18 @@ How to set up to run locally:
   7. Then go to your browser and type "localhost:5000", taking you to your app!
 
 Have Fun!!!
+
+  To make a certain account admin, follow these steps (for an existing account)!
+    1. open terminal
+    2. run "from app import app, db, User
+            app.app_context().push()
+            
+            user = User.query.filter_by(username="ajpayj111").first()
+            user.is_admin = True
+            db.session.commit()"
+    3. Now start the app again and login
+    4. You are now an admin account
+    5. If you want to access the admin debug page, change the url to "/admin/debug"
+
+  Now enjoy!
+            
